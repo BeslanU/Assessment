@@ -1,39 +1,34 @@
 name: Selenium Tests
-
-on:
+'on':
   push:
     branches:
       - main
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.100-preview.7.21379.14
+      - name: Install Chrome browser
+        run: >
+          wget
+          https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 
-    - name: Set up .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 6.0.100-preview.7.21379.14  # Adjust to the latest .NET 6 version
+          sudo dpkg -i google-chrome-stable_current_amd64.deb
 
-    - name: Install Chrome browser
-      run: |
-        wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-        sudo dpkg -i google-chrome-stable_current_amd64.deb
-        sudo apt-get install -f
-      if: runner.os == 'Linux'
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build and run tests
-      run: dotnet test --filter FullyQualifiedName~AddNElementsAndAssert
-
-    - name: Publish test results
-      if: ${{ always() }}
-      uses: actions/upload-artifact@v2
-      with:
-        name: test-results
-        path: TestResults
+          sudo apt-get install -f
+        if: runner.os == 'Linux'
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build and run tests
+        run: dotnet test --filter FullyQualifiedName~AddNElementsAndAssert
+      - name: Publish test results
+        if: '${{ always() }}'
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: TestResults
